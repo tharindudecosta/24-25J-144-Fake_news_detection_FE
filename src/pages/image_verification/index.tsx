@@ -27,7 +27,7 @@ function Home() {
 
       try {
         const response = await axios.post(
-          "http://127.0.0.1:5000/upload",
+          "https://deepfakeimagetext-830359766867.us-central1.run.app",
           formData,
           {
             headers: {
