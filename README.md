@@ -24,3 +24,8 @@ Mar 17, 2025 - IT21270406 - English new analysis Initial commit
 Mar 17, 2025 - IT21030680 - Assets Initializing commit
 
 Mar 17, 2025 - IT21030680 - Home Page
+
+Mar 17, 2025 - IT21030680 - Signup Page
+
+Mar 17, 2025 - IT21030680 - Deepfake video analysis Initial commit
+
