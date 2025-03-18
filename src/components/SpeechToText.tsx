@@ -71,11 +71,19 @@ const SpeechToText = forwardRef<any, SpeechToTextProps>(
         recognitionRef.current.continuous = true;
 
         recognitionRef.current.onresult = (event: any) => {
-          let text = "";
-          for (let i = 0; i < event.results.length; i++) {
-            text += event.results[i][0].transcript;
+          let finalTranscript = ""; // Variable to store only final result text
+
+          // Loop through all results to find the final transcript
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const result = event.results[i];
+            if (result.isFinal) {
+              finalTranscript = result[0].transcript; // Set the final result
+            }
           }
-          setTranscript(text);
+
+          if (finalTranscript) {
+            setTranscript(finalTranscript); // Update the transcript only with final text
+          }
         };
 
         recognitionRef.current.onerror = (event: any) => {
