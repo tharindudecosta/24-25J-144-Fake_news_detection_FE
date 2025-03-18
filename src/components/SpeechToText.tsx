@@ -21,7 +21,10 @@ interface SpeechToTextProps {
 }
 
 const SpeechToText = forwardRef<any, SpeechToTextProps>(
-  ({ onTranscript, onStopListening, onVoiceResponse, onListeningChange}, ref,) => {
+  (
+    { onTranscript, onStopListening, onVoiceResponse, onListeningChange },
+    ref
+  ) => {
     const [transcript, setTranscript] = useState("");
     const [isListening, setIsListening] = useState(false);
     const [isRecording, setIsRecording] = useState(false);
@@ -184,11 +187,11 @@ const SpeechToText = forwardRef<any, SpeechToTextProps>(
         let responseMessage = "Failed to process audio.";
 
         if (result.message === "The input audio is classified as fake.") {
-          responseMessage = "Your voice is real.";
+          responseMessage = "Audio is AI-generated";
         } else if (
           result.message === "The input audio is classified as real."
         ) {
-          responseMessage = "Your voice is AI-generated.";
+          responseMessage = "Audio is real";
         }
 
         Swal.fire("Success", responseMessage, "success");
@@ -246,7 +249,7 @@ const SpeechToText = forwardRef<any, SpeechToTextProps>(
           className="w-50 py-2 px-4 rounded font-bold bg-green-600 text-white"
           onClick={() => setIsModalOpen(true)}
         >
-          Record Voice
+          Voice Analysis
         </button>
 
         {isModalOpen && (
@@ -307,7 +310,7 @@ const SpeechToText = forwardRef<any, SpeechToTextProps>(
           className="ml-2 w-50 py-2 px-4 rounded font-bold bg-gray-700 text-white"
           onClick={() => setIsModalOpen1(true)}
         >
-          Upload File
+          Audio Context Analysis
         </button>
         {isModalOpen1 && (
           <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">

@@ -11,20 +11,25 @@ import axios from "axios";
 
 function Home() {
   const router = useRouter();
-  const [textAreaContent, setTextAreaContent] = useState("");
+  const [textAreaContent, setTextAreaContent] = useState(""); // State to store the text area content
   const [isListening, setIsListening] = useState(false);
   const [aiResponse, setAIResponse] = useState("");
   const speechToTextRef = useRef<any>(null);
   const [voiceResponse, setVoiceResponse] = useState("");
 
+  // To track if the last update was from transcription to avoid duplicate appends
+  const [lastTranscript, setLastTranscript] = useState("");
+
+  // Handle transcription updates
   const handleTranscript = (text: string) => {
-    if(isListening)
-      {
-        setTextAreaContent(text);
-      }
-    
+    // Only append if the text has changed, preventing duplicate appends
+    if (text !== lastTranscript) {
+      setTextAreaContent((prevContent) => prevContent + text);
+      setLastTranscript(text); // Update the last transcription to avoid duplicates
+    }
   };
 
+  // Handle stopping the transcription
   const handleStopListening = () => {
     Swal.fire(
       "Speech Recognition Stopped",
@@ -92,6 +97,7 @@ function Home() {
     setTextAreaContent("");
     setAIResponse("");
     setVoiceResponse("");
+    setLastTranscript(""); // Reset the transcription tracking
     if (speechToTextRef.current) {
       speechToTextRef.current.clearTranscript();
     }
@@ -131,16 +137,15 @@ function Home() {
             <div>
               <textarea
                 className="textarea border-orange-500 bg-orange-100 border-[3px] mt-5 h-[300px] w-[100vh]"
-                value={textAreaContent}
-                onChange={(e) => setTextAreaContent(e.target.value)}
+                value={textAreaContent} // Use state value
+                onChange={(e) => setTextAreaContent(e.target.value)} // Allow manual input
                 placeholder="Speak or type text here..."
               ></textarea>
 
               <div className="flex items-center space-x-3 mt-4">
                 <SpeechToText
-            
                   ref={speechToTextRef}
-                  onTranscript={handleTranscript}
+                  onTranscript={handleTranscript} // Handle transcription
                   onStopListening={handleStopListening}
                   onVoiceResponse={(response) => setVoiceResponse(response)}
                   onListeningChange={setIsListening}
