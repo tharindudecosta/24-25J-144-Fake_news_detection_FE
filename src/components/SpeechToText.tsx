@@ -14,13 +14,14 @@ declare global {
 }
 
 interface SpeechToTextProps {
-  onTranscript: (text: string) => void;
+  onTranscript: (transcript: string) => void;
   onStopListening: () => void;
-  onVoiceResponse: (text: string) => void;
+  onVoiceResponse: (response: string) => void;
+  onListeningChange?: (isListening: boolean) => void; // New Prop
 }
 
 const SpeechToText = forwardRef<any, SpeechToTextProps>(
-  ({ onTranscript, onStopListening, onVoiceResponse }, ref) => {
+  ({ onTranscript, onStopListening, onVoiceResponse, onListeningChange}, ref,) => {
     const [transcript, setTranscript] = useState("");
     const [isListening, setIsListening] = useState(false);
     const [isRecording, setIsRecording] = useState(false);
@@ -102,7 +103,11 @@ const SpeechToText = forwardRef<any, SpeechToTextProps>(
     };
 
     const toggleRecognition = () => {
-      setIsListening((prevIsListening) => !prevIsListening);
+      setIsListening((prevIsListening) => {
+        const newIsListening = !prevIsListening;
+        onListeningChange?.(newIsListening); // Notify parent about state change
+        return newIsListening;
+      });
     };
 
     const startRecording = async () => {
