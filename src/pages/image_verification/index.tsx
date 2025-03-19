@@ -8,6 +8,7 @@ import axios from "axios";
 function Home() {
   const [file, setFile] = useState<File | null>(null);
   const [input, setInput] = useState<string>("");
+  const [imagePath, setImagePath] = useState<string>(""); // State for output image
 
   const handleSubmit = async () => {
     if (file) {
@@ -27,6 +28,7 @@ function Home() {
 
       try {
         const response = await axios.post(
+          // "http://127.0.0.1:5000/upload",
           "https://deepfakeimagetext-830359766867.us-central1.run.app",
           formData,
           {
@@ -37,6 +39,7 @@ function Home() {
         );
         if (response.status === 200) {
           setInput(response.data.result);
+          setImagePath(response.data.output_image_path); // Path to output image
 
           Swal.fire({
             title: "Uploaded Successfully!",
@@ -68,6 +71,7 @@ function Home() {
   const handleClear = () => {
     setFile(null);
     setInput("");
+    setImagePath("");
     window.location.reload();
     Swal.fire("Cleared", "The text and AI result have been cleared.", "info");
   };
@@ -135,6 +139,20 @@ function Home() {
         <b className="text-1.5xl m-5">"AI verifies Result:"</b>
         <div className="text-center">{input}</div>
       </div>
+
+      {/* Display Output Image */}
+      {imagePath && (
+        <div className="card border border-orange-500 bg-orange-100 border-[3px] rounded-box h-[500px] w-[500px] flex-grow  m-5">
+          <b className="text-1.5xl m-5">Processed Image:</b>
+          <div className="text-center">
+            <img
+              src={`http://127.0.0.1:5000/${imagePath}`} // Ensure this URL works correctly
+              alt="Processed Image"
+              className="w-full h-auto"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
