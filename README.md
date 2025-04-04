@@ -1,4 +1,4 @@
-13# 24-25J-144 - Group Data
+# 24-25J-144 - Group Data
 
 De Costa M.T.N. IT21030680 - 
 Detecting deep fakeed videos using facial features

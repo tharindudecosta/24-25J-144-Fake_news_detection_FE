@@ -123,7 +123,7 @@ function Home() {
             <div className="card w-96 flex-grow me-3 relative">
               <p>
                 "Uncertain whether an English text or voice recording is
-                authentic? Upload your content, and our AI-powered system will
+                authentic? Upload your content, and our system will
                 analyze it for any signs of manipulation or fabrication. Using
                 advanced natural language processing and voice recognition
                 technology, we’ll determine if the text is genuine or fake and

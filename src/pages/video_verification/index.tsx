@@ -75,7 +75,7 @@ function Home() {
           console.log("Cheking Deepfake");
           setAIResponse(apiresult);
 
-          if (apiresult === "1") {
+          if (apiresult === "real") {
             setAIResponse(apiresult);
             console.log("Cheking lighting");
 
@@ -112,7 +112,6 @@ function Home() {
             const result_cam = await response_cam.json();
             console.log("result_cam " + result_cam.processed_images);
 
-            // if (result_new.re)
             const apiresult_new = result_cam.processed_images;
 
             setAiVerficationImages(apiresult_new);
@@ -177,10 +176,10 @@ function Home() {
             <div className="card w-96 flex-grow me-3 relative">
               <p>
                 "Not sure if a video is authentic or manipulated? Upload your
-                video, and our AI-powered verification system will analyze it
+                video, and our Deep learning verification system will analyze it
                 for signs of manipulation, deepfakes, or alterations. Whether
-                you're checking for fake news, doctored footage, or AI-generated
-                content, our system provides quick and accurate results to help
+                you're checking for fake news, doctored footage,
+                our system provides quick and accurate results to help
                 you identify real from fake content."
               </p>
             </div>
