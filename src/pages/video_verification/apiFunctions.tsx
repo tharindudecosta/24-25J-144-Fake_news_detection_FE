@@ -5,7 +5,8 @@ import Swal from "sweetalert2";
 
 export const uploadVideoToFirebase = async (
   videoFile: File,
-  userEmail: string
+  userEmail: string,
+  rootFolder: string
 ) => {
   if (!videoFile || !userEmail) {
     throw new Error("Missing video or user email");
@@ -13,9 +14,10 @@ export const uploadVideoToFirebase = async (
 
   const storageRef = ref(
     storage,
-    `VideoVerification/${userEmail}/Results/${Date.now()}_${videoFile.name}`
+    `${rootFolder}/${userEmail}/Results/${Date.now()}_${videoFile.name}`
   );
 
+  console.log(storageRef)
   await uploadBytes(storageRef, videoFile);
   const videoUrl = await getDownloadURL(storageRef);
 
@@ -35,7 +37,7 @@ export const sendVideoToAPI = async (videoFile: File, userEmail: string) => {
       didOpen: () => Swal.showLoading(),
     });
 
-    const videoUrl = await uploadVideoToFirebase(videoFile, userEmail);
+    const videoUrl = await uploadVideoToFirebase(videoFile, userEmail,"VideoVerification");
 
     const res = await fetch("http://127.0.0.1:5000/analyzeVideo", {
       method: "POST",
@@ -48,7 +50,7 @@ export const sendVideoToAPI = async (videoFile: File, userEmail: string) => {
       if (result?.result) {
         const userDocRef = collection(
           firestore,
-          "VideoVerificationLighting",
+          "VideoVerification",
           userEmail,
           "Results"
         );
@@ -96,7 +98,7 @@ export const analyzeLighting = async (videoFile: File, userEmail: string) => {
       didOpen: () => Swal.showLoading(),
     });
 
-    const videoUrl = await uploadVideoToFirebase(videoFile, userEmail);
+    const videoUrl = await uploadVideoToFirebase(videoFile, userEmail,"VideoVerificationLighting");
 
     const res = await fetch("http://127.0.0.1:5000/predictLightning", {
       method: "POST",
@@ -109,7 +111,7 @@ export const analyzeLighting = async (videoFile: File, userEmail: string) => {
       if (result?.result) {
         const userDocRef = collection(
           firestore,
-          "VideoVerification",
+          "VideoVerificationLighting",
           userEmail,
           "Results"
         );
