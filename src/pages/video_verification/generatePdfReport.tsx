@@ -102,7 +102,7 @@ export const generatePdfReport = async (
   // CAM Images
   if (aiVerificationImages.length > 0) {
     doc.setFontSize(12);
-    doc.text("Analzyed Frames:", 20, 120);
+    doc.text("Analzyed Frames:", 20, 140);
 
     const firebaseBasePath =
       "https://storage.googleapis.com/blood-donation-ac142.appspot.com/VideoVerification/";
@@ -114,7 +114,7 @@ export const generatePdfReport = async (
         .slice(2)
         .join("/");
 
-      const y = 130 + index * 10;
+      const y = 140 + index * 10;
 
       doc.textWithLink(`Frame ${index + 1}: ${relativePath}`, 20, y, {
         url: imageUrl,
@@ -122,8 +122,8 @@ export const generatePdfReport = async (
     });
   } else {
     doc.setFontSize(12);
-    doc.text("Analzyed Frames:", 20, 120);
-    doc.text("[Analzyed Frames To Be Generated]", 20, 125);
+    doc.text("Analzyed Frames:", 20, 140);
+    doc.text("[Analzyed Frames To Be Generated]", 20, 145);
   }
 
 
