@@ -195,14 +195,14 @@ function Home() {
                   className="bg-blue-900 text-white font-bold py-2 px-4 rounded"
                   onClick={handleSubmit1}
                 >
-                  Check Political News
+                  Check Sinhala News
                 </button>
-                <button
+                {/* <button
                   className="bg-blue-900 text-white font-bold py-2 px-4 rounded"
                   onClick={handleSubmit}
                 >
                   Check Sinhala News
-                </button>
+                </button> */}
                 <button
                   className="bg-red-600 text-white font-bold py-2 px-4 rounded"
                   onClick={handleClear}
