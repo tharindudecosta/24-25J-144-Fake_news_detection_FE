@@ -39,7 +39,7 @@ export const sendVideoToAPI = async (videoFile: File, userEmail: string) => {
 
     const videoUrl = await uploadVideoToFirebase(videoFile, userEmail,"VideoVerification");
 
-    const res = await fetch("http://127.0.0.1:5000/analyzeVideo", {
+    const res = await fetch("http://3.25.131.148/api/analyzeVideo", {
       method: "POST",
       body: formData,
     });
@@ -100,7 +100,7 @@ export const analyzeLighting = async (videoFile: File, userEmail: string) => {
 
     const videoUrl = await uploadVideoToFirebase(videoFile, userEmail,"VideoVerificationLighting");
 
-    const res = await fetch("http://127.0.0.1:5000/predictLightning", {
+    const res = await fetch("http://3.25.131.148/api/predictLightning", {
       method: "POST",
       body: formData,
     });
@@ -154,7 +154,7 @@ export const generateCAM = async (videoFile: File, userEmail: string) => {
   formData.append("num_frames", "5");
 
   try {
-    const res = await fetch("http://127.0.0.1:5000/generateCAM", {
+    const res = await fetch("http://3.25.131.148/api/generateCAM", {
       method: "POST",
       body: formData,
     });

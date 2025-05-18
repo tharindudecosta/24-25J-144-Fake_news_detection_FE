@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import image3 from "../../../public/assets/img6.png";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -6,7 +6,7 @@ import Niv from "@/components/niv";
 import Swal from "sweetalert2";
 import { ImageLoader } from "next/image";
 import { sendVideoToAPI, analyzeLighting, generateCAM } from "./apiFunctions";
-import { generatePdfReport } from "./generatePdfReport"
+import { generatePdfReport } from "./generatePdfReport";
 import { LuScanFace } from "react-icons/lu";
 import { MdLightMode } from "react-icons/md";
 import { IoImagesSharp } from "react-icons/io5";
@@ -20,11 +20,13 @@ function Home() {
   const [aiResponse, setAIResponse] = useState<any>(null);
   const [aiLightingResponse, setAILightingResponse] = useState<any>(null);
   const [aiVerficationImages, setAiVerficationImages] = useState<string[]>([]);
+  const [enlargedImage, setEnlargedImage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.length) {
       setVideoFile(e.target.files[0]);
-      setVideoName(e.target.files[0].name)
+      setVideoName(e.target.files[0].name);
     }
   };
 
@@ -106,6 +108,9 @@ function Home() {
     setAIResponse("");
     setAILightingResponse("");
     setAiVerficationImages([]);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
     Swal.fire("Cleared", "All data reset", "info");
   };
 
@@ -115,9 +120,18 @@ function Home() {
       Swal.fire("Error", "User email not found. Please log in.", "error");
       return;
     }
-    const result = await generatePdfReport(aiResponse, aiLightingResponse,aiVerficationImages,videoName,userEmail);
-  };
 
+    if (!aiResponse && !aiLightingResponse && aiVerficationImages.length === 0)
+      return Swal.fire("Start analysis", "Upload a video first", "warning");
+
+    const result = await generatePdfReport(
+      aiResponse,
+      aiLightingResponse,
+      aiVerficationImages,
+      videoName,
+      userEmail
+    );
+  };
 
   // const myLoader = ({ src }: { src: string }) => `${src}`;
   const myLoader: ImageLoader = ({ src }: { src: string }) => {
@@ -140,6 +154,7 @@ function Home() {
             <input
               type="file"
               accept="video/*"
+              ref={fileInputRef}
               onChange={handleFileChange}
               className="py-2 mt-4 mb-4 block w-full text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
@@ -213,101 +228,216 @@ function Home() {
 
       {/* AI Response */}
       <div className="card border border-orange-500 bg-orange-100 m-5 p-4">
-        <b className="text-xl">Vider Analysis Response:</b>
-        {aiResponse ? (
-          <table className="table-auto border-collapse border border-gray-400 mt-4 w-full">
-            <thead>
-              <tr className="bg-blue-200">
-                <th className="border border-gray-400 px-4 py-2">Fake Frame Count</th>
-                <th className="border border-gray-400 px-4 py-2">Real Frame Count</th>
-                <th className="border border-gray-400 px-4 py-2">Total Frame Count</th>
-                <th className="border border-gray-400 px-4 py-2">Final Prediction</th>
-                <th className="border border-gray-400 px-4 py-2">Time Elapsed</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="bg-white">
-                <td className="border border-gray-400 px-4 py-2">
-                  {aiResponse.fake_count}
-                </td>
-                <td className="border border-gray-400 px-4 py-2">
-                  {aiResponse.real_count}
-                </td>
-                <td className="border border-gray-400 px-4 py-2">
-                  {aiResponse.total_count}
-                </td>
-                <td className="border border-gray-400 px-4 py-2">
-                  {aiResponse.prediction}
-                </td>
-                <td className="border border-gray-400 px-4 py-2">
-                  {aiResponse.total_time}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        ) : (
-          <p>No analysis result yet</p>
-        )}
+        <b className="text-xl flex items-center gap-2">
+          Video Analysis Response:
+          <div className="relative group">
+            <span className="text-white bg-gray-600 rounded-full w-5 h-5 flex items-center justify-center cursor-pointer text-sm">
+              ?
+            </span>
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 text-xs text-white bg-black p-2 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-50">
+              These are Class Activation Map (CAM) images showing which areas
+              influenced the AI's decision.
+            </div>
+          </div>
+        </b>
+        <div
+          className={`text-center p-4 rounded-lg w-full ${
+            aiResponse ? "bg-white shadow-md" : "bg-orange-50"
+          }`}
+        >
+          {aiResponse ? (
+            <table className="table-auto border-collapse border border-gray-400 mt-4 w-full">
+              <thead>
+                <tr className="bg-blue-200">
+                  <th className="border border-gray-400 px-4 py-2">
+                    Fake Frame Count
+                  </th>
+                  <th className="border border-gray-400 px-4 py-2">
+                    Real Frame Count
+                  </th>
+                  <th className="border border-gray-400 px-4 py-2">
+                    Total Frame Count
+                  </th>
+                  <th className="border border-gray-400 px-4 py-2">
+                    Final Prediction
+                  </th>
+                  <th className="border border-gray-400 px-4 py-2">
+                    Time Elapsed
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="bg-white">
+                  <td className="border border-gray-400 px-4 py-2">
+                    {aiResponse.fake_count}
+                  </td>
+                  <td className="border border-gray-400 px-4 py-2">
+                    {aiResponse.real_count}
+                  </td>
+                  <td className="border border-gray-400 px-4 py-2">
+                    {aiResponse.total_count}
+                  </td>
+                  <td className="border border-gray-400 px-4 py-2">
+                    {aiResponse.prediction}
+                  </td>
+                  <td className="border border-gray-400 px-4 py-2">
+                    {aiResponse.total_time} Seconds
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          ) : (
+            <div className="flex items-center justify-center space-x-2">
+              <div className="animate-pulse h-2 w-2 bg-orange-500 rounded-full"></div>
+              <div className="animate-pulse h-2 w-2 bg-orange-500 rounded-full"></div>
+              <div className="animate-pulse h-2 w-2 bg-orange-500 rounded-full"></div>
+              <span className="text-gray-600">Awaiting analysis...</span>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="card border border-orange-500 bg-orange-100 m-5 p-4">
-        <b className="text-xl">Lighting Response:</b>
-        {aiLightingResponse ? (
-          <table className="table-auto border-collapse border border-gray-400 mt-4 w-full">
-            <thead>
-              <tr className="bg-blue-200">
-                <th className="border border-gray-400 px-4 py-2">Fake Frame Count</th>
-                <th className="border border-gray-400 px-4 py-2">Real Frame Count</th>
-                <th className="border border-gray-400 px-4 py-2">Total Frame Count</th>
-                <th className="border border-gray-400 px-4 py-2">Final Prediction</th>
-                <th className="border border-gray-400 px-4 py-2">Time Elapsed</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="bg-white">
-                <td className="border border-gray-400 px-4 py-2">
-                  {aiLightingResponse.fake_count}
-                </td>
-                <td className="border border-gray-400 px-4 py-2">
-                  {aiLightingResponse.real_count}
-                </td>
-                <td className="border border-gray-400 px-4 py-2">
-                  {aiLightingResponse.total_count}
-                </td>
-                <td className="border border-gray-400 px-4 py-2">
-                  {aiLightingResponse.prediction}
-                </td>
-                <td className="border border-gray-400 px-4 py-2">
-                  {aiLightingResponse.total_time} Seconds
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        ) : (
-          <p>No analysis result yet</p>
-        )}
+        <b className="text-xl flex items-center gap-2">
+          Lighting Analysis Response:
+          <div className="relative group">
+            <span className="text-white bg-gray-600 rounded-full w-5 h-5 flex items-center justify-center cursor-pointer text-sm">
+              ?
+            </span>
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 text-xs text-white bg-black p-2 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-50">
+              These are Class Activation Map (CAM) images showing which areas
+              influenced the AI's decision.
+            </div>
+          </div>
+        </b>
+        <div
+          className={`text-center p-4 rounded-lg w-full ${
+            aiLightingResponse ? "bg-white shadow-md" : "bg-orange-50"
+          }`}
+        >
+          {aiLightingResponse ? (
+            <table className="table-auto border-collapse border border-gray-400 mt-4 w-full">
+              <thead>
+                <tr className="bg-blue-200">
+                  <th className="border border-gray-400 px-4 py-2">
+                    Fake Frame Count
+                  </th>
+                  <th className="border border-gray-400 px-4 py-2">
+                    Real Frame Count
+                  </th>
+                  <th className="border border-gray-400 px-4 py-2">
+                    Total Frame Count
+                  </th>
+                  <th className="border border-gray-400 px-4 py-2">
+                    Final Prediction
+                  </th>
+                  <th className="border border-gray-400 px-4 py-2">
+                    Time Elapsed
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="bg-white">
+                  <td className="border border-gray-400 px-4 py-2">
+                    {aiLightingResponse.fake_count}
+                  </td>
+                  <td className="border border-gray-400 px-4 py-2">
+                    {aiLightingResponse.real_count}
+                  </td>
+                  <td className="border border-gray-400 px-4 py-2">
+                    {aiLightingResponse.total_count}
+                  </td>
+                  <td className="border border-gray-400 px-4 py-2">
+                    {aiLightingResponse.prediction}
+                  </td>
+                  <td className="border border-gray-400 px-4 py-2">
+                    {aiLightingResponse.total_time} Seconds
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          ) : (
+            <div className="flex items-center justify-center space-x-2">
+              <div className="animate-pulse h-2 w-2 bg-orange-500 rounded-full"></div>
+              <div className="animate-pulse h-2 w-2 bg-orange-500 rounded-full"></div>
+              <div className="animate-pulse h-2 w-2 bg-orange-500 rounded-full"></div>
+              <span className="text-gray-600">Awaiting analysis...</span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* CAM Images */}
       <div className="card border border-orange-500 bg-orange-100 m-5 p-4">
-        <b className="text-xl">Analyzed Images:</b>
-        <div className="flex flex-wrap gap-4 mt-4">
-          {aiVerficationImages.length === 0 ? (
-            <p>No images yet</p>
+        <b className="text-xl flex items-center gap-2">
+          Analyzed Images:
+          <div className="relative group">
+            <span className="text-white bg-gray-600 rounded-full w-5 h-5 flex items-center justify-center cursor-pointer text-sm">
+              ?
+            </span>
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 text-xs text-white bg-black p-2 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-50">
+              These are Class Activation Map (CAM) images showing which areas
+              influenced the AI's decision.
+            </div>
+          </div>
+        </b>{" "}
+        <div
+          className={`text-center p-4 rounded-lg w-full ${
+            aiVerficationImages.length > 0
+              ? "bg-white shadow-md"
+              : "bg-orange-50"
+          }`}
+        >
+          {aiVerficationImages.length > 0 ? (
+            // ✅ Wrap all images in one flex container
+            <div className="flex flex-wrap justify-center gap-4">
+              {aiVerficationImages.map((src, index) => (
+                <Image
+                  key={index}
+                  loader={myLoader}
+                  src={src}
+                  alt={`Image ${index + 1}`}
+                  width={200}
+                  height={200}
+                  className="rounded-lg shadow-md hover:scale-105 transition-transform duration-200"
+                  onClick={() => setEnlargedImage(src)}
+                />
+              ))}
+            </div>
           ) : (
-            aiVerficationImages.map((src, index) => (
-              <Image
-                key={index}
-                loader={myLoader}
-                src={src}
-                alt={`Image ${index + 1}`}
-                width={200}
-                height={200}
-              />
-            ))
+            <div className="flex items-center justify-center space-x-2">
+              <div className="animate-pulse h-2 w-2 bg-orange-500 rounded-full"></div>
+              <div className="animate-pulse h-2 w-2 bg-orange-500 rounded-full"></div>
+              <div className="animate-pulse h-2 w-2 bg-orange-500 rounded-full"></div>
+              <span className="text-gray-600">Awaiting analysis...</span>
+            </div>
           )}
         </div>
       </div>
+
+      {enlargedImage && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+          onClick={() => setEnlargedImage(null)} // close on background click
+        >
+          <div className="relative">
+            <Image
+              loader={myLoader}
+              src={enlargedImage}
+              alt="Enlarged"
+              width={800}
+              height={600}
+              className="rounded-lg shadow-lg max-w-full max-h-[90vh]"
+            />
+            <button
+              onClick={() => setEnlargedImage(null)}
+              className="absolute top-2 right-2 text-white text-3xl font-bold"
+            >
+              &times;
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
