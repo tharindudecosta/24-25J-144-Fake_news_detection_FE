@@ -2,15 +2,14 @@ import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
 import { ImageLoader } from "next/image";
 
-
 const options: Intl.DateTimeFormatOptions = {
-  weekday: 'long',
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric',
-  hour: 'numeric',
-  minute: 'numeric',
-  second: 'numeric',
+  weekday: "long",
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+  hour: "numeric",
+  minute: "numeric",
+  second: "numeric",
   hour12: true,
 };
 
@@ -32,9 +31,13 @@ export const generatePdfReport = async (
 
   doc.text(`User Email: ${userEmail}`, 20, 40);
   const now = new Date();
-  const userFriendlyTimestamp = new Intl.DateTimeFormat('en-US', options).format(now).replace(/,/g, "").replace(/\//g, ", ").replace(/ /g, " ");
+  const userFriendlyTimestamp = new Intl.DateTimeFormat("en-US", options)
+    .format(now)
+    .replace(/,/g, "")
+    .replace(/\//g, ", ")
+    .replace(/ /g, " ");
   const timestamp = now.toLocaleString().replace(/[/,: ]/g, "_");
-  
+
   doc.text(`Report Generated at: ${userFriendlyTimestamp}`, 20, 50);
 
   // Deepfake Detection Results
@@ -93,7 +96,7 @@ export const generatePdfReport = async (
         ],
       ],
     });
-  } else{
+  } else {
     doc.setFontSize(12);
     doc.text("Lighting Analysis Results:", 20, 100);
     doc.text("[Lighting Analysis Results To Be Generated]", 20, 105);
@@ -102,30 +105,23 @@ export const generatePdfReport = async (
   // CAM Images
   if (aiVerificationImages.length > 0) {
     doc.setFontSize(12);
-    doc.text("Analzyed Frames:", 20, 140);
-
-    const firebaseBasePath =
-      "https://storage.googleapis.com/blood-donation-ac142.appspot.com/VideoVerification/";
+    doc.text("Analyzed Frames:", 20, 140);
 
     aiVerificationImages.forEach((imageUrl: string, index: number) => {
-      const relativePath = imageUrl
-        .replace(firebaseBasePath, "")
-        .split("/")
-        .slice(2)
-        .join("/");
+      // Extract only the filename
+      const relativePath = imageUrl.split("/").pop();
 
-      const y = 140 + index * 10;
+      const y = 150 + index * 10;
 
-      doc.textWithLink(`Frame ${index + 1}: ${relativePath}`, 20, y, {
+      doc.textWithLink(`Frame ${index + 1}: ${relativePath}`, 30, y, {
         url: imageUrl,
       });
     });
   } else {
     doc.setFontSize(12);
-    doc.text("Analzyed Frames:", 20, 140);
-    doc.text("[Analzyed Frames To Be Generated]", 20, 145);
+    doc.text("Analyzed Frames:", 20, 140);
+    doc.text("[Analyzed Frames To Be Generated]", 20, 145);
   }
-
 
   doc.save(`video_analysis_report_${timestamp}.pdf`);
 };
