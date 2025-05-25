@@ -15,10 +15,16 @@ function Home() {
   const [isListening, setIsListening] = useState(false);
   const [aiResponse, setAIResponse] = useState("");
   const [bbcResponse, setBBCResponse] = useState("");
-  const speechToTextRef = useRef(null);
   const [voiceResponse, setVoiceResponse] = useState("");
 
-  const handleTranscript = (text) => {
+  interface SpeechToTextHandle {
+    stopListening: () => void;
+    clearTranscript: () => void;
+  }
+
+  const speechToTextRef = useRef<SpeechToTextHandle>(null);
+
+  const handleTranscript = (text: string) => {
     if (!textAreaContent.trim()) {
       setTextAreaContent(text);
     }
@@ -125,19 +131,19 @@ function Home() {
     router.push("/englishNewsHistory");
   };
 
-  const getColorClass = (text, type) => {
-    if (!text) return "bg-yellow-400 text-black";
+  const getColorClass = (val: string | undefined | null, type = ""): string => {
+    if (!val || typeof val !== "string") return "bg-yellow-400 text-black";
+
     if (type === "bbc") {
-      return text === "FOUND"
+      return val === "FOUND"
         ? "bg-green-500 text-white"
         : "bg-red-500 text-white";
     }
-    if (text.toLowerCase().includes("real")) return "bg-green-500 text-white";
-    if (
-      text.toLowerCase().includes("fake") ||
-      text.toLowerCase().includes("ai")
-    )
+
+    if (val.toLowerCase().includes("real")) return "bg-green-500 text-white";
+    if (val.toLowerCase().includes("fake") || val.toLowerCase().includes("ai"))
       return "bg-red-500 text-white";
+
     return "bg-yellow-400 text-black";
   };
 
@@ -172,7 +178,7 @@ function Home() {
       aiResponse.toLowerCase().includes("real")
     ) {
       warningText =
-        "The System determined this news is contextually real, but it wasn't found on BBC. It may be fake news or older than 48 hours.";
+        "The system determined this news is contextually real, but it wasn't found on BBC. There is a chance this could be fake news, or it might be real but older than 48 hours.";
     }
   }
 
