@@ -113,7 +113,7 @@ function PaymentGateway() {
     <PayPalScriptProvider
       options={{
         clientId:
-          "AS_LJUM71TxlzUlnEsPUqNnvm36hCse1sv4nedQbJJgEsWBQb5ZTb0e-q7eLz_orFKTzKxEVazvVdMGb",
+          "AWOJXxq72xZnVNvMi2IzOAHNab_jSe1WvZW_prrQVIY_zAtQJdYGgmMNaYmyDvg53WB5nMJyuyHyj9qg",
       }}
     >
       <div className="min-h-screen bg-gray-50">

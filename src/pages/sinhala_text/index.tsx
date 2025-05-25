@@ -245,7 +245,7 @@ function Home() {
                             <h6 className="text-sm font-medium text-gray-600 mb-2">
                               {politicalBiasResult == "real" &&
                                 politicalBiasDailyMirrorResult == "found" && (
-                                  <>
+                                  <><span className="text-[16px] font-semibold">Final Result : </span>
                                     The System determined this news is
                                     contextually real, and it was also found on
                                     Ada Derana. This strongly supports that the
@@ -255,7 +255,7 @@ function Home() {
                               {politicalBiasResult == "real" &&
                                 politicalBiasDailyMirrorResult ==
                                   "not found" && (
-                                  <>
+                                  <><span className="text-[16px] font-semibold">Final Result : </span>
                                     The System determined this news is
                                     contextually real, but it wasn't found on
                                     Ada Derana. It may be fake news or older
@@ -265,7 +265,7 @@ function Home() {
                               {politicalBiasResult == "fake" &&
                                 politicalBiasDailyMirrorResult ==
                                   "not found" && (
-                                  <>
+                                  <><span className="text-[16px] font-semibold">Final Result : </span>
                                     The System determined this news is
                                     contextually fake, also wasn't found on Ada
                                     Derana. This increases the chances that it's
@@ -274,7 +274,7 @@ function Home() {
                                 )}
                               {politicalBiasResult == "fake" &&
                                 politicalBiasDailyMirrorResult == "found" && (
-                                  <>
+                                  <><span className="text-[16px] font-semibold">Final Result : </span>
                                     Although the System determined this news is
                                     contextually fake, But the news is found on
                                     Ada Derana. It is considered real and
