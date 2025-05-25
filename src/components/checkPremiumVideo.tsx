@@ -1,5 +1,5 @@
 import Swal from "sweetalert2";
-import { auth, firestore, storage } from "../../../firebaseconfig";
+import { auth, firestore, storage } from "../../firebaseconfig";
 import {
   collection,
   addDoc,

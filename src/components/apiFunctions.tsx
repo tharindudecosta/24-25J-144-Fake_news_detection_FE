@@ -1,4 +1,4 @@
-import { auth, firestore, storage } from "../../../firebaseconfig";
+import { auth, firestore, storage } from "../../firebaseconfig";
 import { collection, addDoc, doc, setDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import Swal from "sweetalert2";
