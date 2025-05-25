@@ -5,15 +5,15 @@ import { useRouter } from "next/navigation";
 import Niv from "@/components/niv";
 import Swal from "sweetalert2";
 import { ImageLoader } from "next/image";
-import { sendVideoToAPI, analyzeLighting, generateCAM } from "./apiFunctions";
-import { generatePdfReport } from "./generatePdfReport";
+import { sendVideoToAPI, analyzeLighting, generateCAM } from "../../components/apiFunctions";
+import { generatePdfReport } from "../../components/generatePdfReport";
 import { LuScanFace } from "react-icons/lu";
 import { MdLightMode } from "react-icons/md";
 import { IoImagesSharp } from "react-icons/io5";
 import { MdClear } from "react-icons/md";
 import { FaFilePdf } from "react-icons/fa6";
-import ContentBar from "./contentBar";
-import { checkPremium } from "./checkPremiumVideo";
+import ContentBar from "../../components/contentBar";
+import { checkPremium } from "../../components/checkPremiumVideo";
 
 function Home() {
   const [videoFile, setVideoFile] = useState<File | null>(null);
@@ -110,7 +110,8 @@ function Home() {
       Swal.fire("Error", "User email not found. Please log in.", "error");
       return;
     }
-
+    const hasPremium = await checkPremium(userEmail, router);
+    if (!hasPremium) return;
     if (!videoFile)
       return Swal.fire("No video", "Upload a video first", "warning");
 
