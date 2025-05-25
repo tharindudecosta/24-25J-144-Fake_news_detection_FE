@@ -160,7 +160,7 @@ function PaymentGateway() {
                   Premium Plan
                 </h3>
                 <div className="text-4xl font-bold text-orange-500 mb-4">
-                  $10<span className="text-lg text-gray-600">/month</span>
+                  $9.99<span className="text-lg text-gray-600">/month</span>
                 </div>
                 <p className="text-gray-600 mb-6">
                   Billed monthly, cancel anytime
