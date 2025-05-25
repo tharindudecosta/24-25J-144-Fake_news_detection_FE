@@ -2,6 +2,8 @@ import Link from "next/link";
 import Router from "next/router";
 import React, { useEffect, useState } from "react";
 import Swal from "sweetalert2";
+
+
 export default function Niv() {
   const [email, setEmail] = useState(null);
 
@@ -97,6 +99,16 @@ export default function Niv() {
           </li>
         </ul>
       </div>
+
+      <div className="flex items-center gap-4">
+        {/* Other nav links here */}
+        <Link href="/paymentGateWay">
+          <button className="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-full shadow">
+            <span>Premium</span>
+          </button>
+        </Link>
+      </div>
+
       <div className="navbar-end">
         <a
           className="btn bg-orange-500 border-orange-500 text-white"
