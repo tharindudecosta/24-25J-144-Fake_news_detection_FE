@@ -196,7 +196,6 @@ const SpeechToText = forwardRef<any, SpeechToTextProps>(
             Swal.showLoading();
           },
         });
-
         const response1 = await fetch(
           "https://voicetotext-766120731872.us-central1.run.app",
           {

@@ -1,33 +1,40 @@
-# 24-25J-144 - Group Data
+This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-De Costa M.T.N. IT21030680 - 
-Detecting deep fakeed videos using facial features
+## Getting Started
 
-Samaraweera S.M. IT21074622 - 
-Detecting manipulated images and AI generated images to verify the authenticity of news
+First, run the development server:
 
-Madhumalka k.c.s IT21252754 - 
-Identifying Sinhala Fake News and Political Biased in 
-Sinhala News
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
 
-Jayasinghe H.D.D.R IT21270406 -
-Identify English Fake News with Voice Assistant
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-# Merge log
+You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
 
-Mar 13, 2025 - IT21030680 - Repo Initializing commit
+[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
 
-Mar 16, 2025 - IT21252754 - Sinhala new analysis Initial commit
+The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
 
-Mar 17, 2025 - IT21270406 - English new analysis Initial commit
+This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
 
-Mar 17, 2025 - IT21030680 - Assets Initializing commit
+## Learn More
 
-Mar 17, 2025 - IT21030680 - Home Page
+To learn more about Next.js, take a look at the following resources:
 
-Mar 17, 2025 - IT21030680 - Signup Page
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-Mar 17, 2025 - IT21030680 - Deepfake video analysis Initial commit
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
 
-Apr 05, 2025 - IT21030680 - Deepfake video analysis page overhall
+## Deploy on Vercel
 
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
