@@ -6,30 +6,24 @@ import Niv from "@/components/niv";
 import Swal from "sweetalert2";
 import SpeechToText from "../../components/SpeechToText";
 import { auth, firestore } from "../../../firebaseconfig";
-import { collection, addDoc, doc, setDoc } from "firebase/firestore";
+import { collection, addDoc, doc } from "firebase/firestore";
 import axios from "axios";
 
 function Home() {
   const router = useRouter();
-  const [textAreaContent, setTextAreaContent] = useState(""); // State to store the text area content
+  const [textAreaContent, setTextAreaContent] = useState("");
   const [isListening, setIsListening] = useState(false);
   const [aiResponse, setAIResponse] = useState("");
-  const speechToTextRef = useRef<any>(null);
+  const [bbcResponse, setBBCResponse] = useState("");
+  const speechToTextRef = useRef(null);
   const [voiceResponse, setVoiceResponse] = useState("");
 
-  // To track if the last update was from transcription to avoid duplicate appends
-  const [lastTranscript, setLastTranscript] = useState("");
-
-  // Handle transcription updates
-  const handleTranscript = (text: string) => {
-    // Only append if the text has changed, preventing duplicate appends
-    if (text !== lastTranscript) {
-      setTextAreaContent((prevContent) => prevContent + text);
-      setLastTranscript(text); // Update the last transcription to avoid duplicates
+  const handleTranscript = (text) => {
+    if (!textAreaContent.trim()) {
+      setTextAreaContent(text);
     }
   };
 
-  // Handle stopping the transcription
   const handleStopListening = () => {
     Swal.fire(
       "Speech Recognition Stopped",
@@ -64,24 +58,46 @@ function Home() {
           Swal.showLoading();
         },
       });
+
       const response = await axios.post(
-        "https://us-central1-regal-campus-448011-c9.cloudfunctions.net/fakenewsEnglish",
+        "https://fakenewsenglish-766120731872.us-central1.run.app",
         { text: textAreaContent }
       );
 
       const apiResult = response.data.result;
-      console.log("API Result:", apiResult);
-
       const userDocRef = collection(firestore, "EnglishNews");
       const docRef = doc(userDocRef, userEmail);
+      const resultsCollection = collection(docRef, "Results");
 
-      await setDoc(docRef, {
-        inputText: textAreaContent,
-        result: apiResult,
-        timestamp: new Date(),
-      });
+      try {
+        const crawlResponse = await axios.post(
+          "https://englishwebscraping-766120731872.europe-west1.run.app",
+          { text: textAreaContent }
+        );
 
-      setAIResponse(apiResult);
+        const { status } = crawlResponse.data;
+        setBBCResponse(status === "found" ? "FOUND" : "NOT FOUND");
+
+        await addDoc(resultsCollection, {
+          inputText: textAreaContent,
+          aiResult: apiResult,
+          bbcResult: status === "found" ? "FOUND" : "NOT FOUND",
+          timestamp: new Date(),
+        });
+        setAIResponse(apiResult);
+
+        Swal.fire(
+          status === "found" ? "Content Verified" : "Content Not Found",
+          status === "found"
+            ? "This content exists on BBC!"
+            : "This content doesn't match BBC articles.",
+          status === "found" ? "success" : "warning"
+        );
+      } catch (crawlErr) {
+        console.error("Web scraping error:", crawlErr);
+        Swal.fire("Error", "BBC scraping failed. Try again.", "error");
+      }
+
       Swal.fire("Success", "The text was processed successfully!", "success");
     } catch (error) {
       console.error("Error submitting text:", error);
@@ -96,14 +112,33 @@ function Home() {
   const handleClear = () => {
     setTextAreaContent("");
     setAIResponse("");
+    setBBCResponse("");
     setVoiceResponse("");
-    setLastTranscript(""); // Reset the transcription tracking
     if (speechToTextRef.current) {
       speechToTextRef.current.clearTranscript();
     }
     window.location.reload();
-    console.log("Clearing data...");
     Swal.fire("Cleared", "The text and AI result have been cleared.", "info");
+  };
+
+  const handleViewHistory = () => {
+    router.push("/englishNewsHistory");
+  };
+
+  const getColorClass = (text, type) => {
+    if (!text) return "bg-yellow-400 text-black";
+    if (type === "bbc") {
+      return text === "FOUND"
+        ? "bg-green-500 text-white"
+        : "bg-red-500 text-white";
+    }
+    if (text.toLowerCase().includes("real")) return "bg-green-500 text-white";
+    if (
+      text.toLowerCase().includes("fake") ||
+      text.toLowerCase().includes("ai")
+    )
+      return "bg-red-500 text-white";
+    return "bg-yellow-400 text-black";
   };
 
   return (
@@ -115,39 +150,44 @@ function Home() {
             <h2 className="text-orange-500 text-3xl font-bold mb-8">
               English Text and Voice Verification: Detect Authenticity
             </h2>
-
             <b className="text-1.5xl me-5">
               Upload text or voice to verify if it's real or fabricated
             </b>
-
             <div className="card w-96 flex-grow me-3 relative">
               <p>
-                "Uncertain whether an English text or voice recording is
-                authentic? Upload your content, and our system will
+                Uncertain whether an English text or voice recording is
+                authentic? Upload your content, and our AI-powered system will
                 analyze it for any signs of manipulation or fabrication. Using
                 advanced natural language processing and voice recognition
-                technology, we’ll determine if the text is genuine or fake and
+                technology, we'll determine if the text is genuine or fake and
                 whether the voice recording has been altered or generated by AI.
-                Ensure that the information you receive or share is reliable and
-                accurate."
               </p>
             </div>
           </div>
           <div className="flex justify-center lg:w-1/2 w-full mb-8 lg:mb-0">
             <div>
+              <div className="flex justify-end mb-4">
+                <button
+                  className="bg-gray-600 text-white font-bold py-2 px-4 rounded"
+                  onClick={handleViewHistory}
+                >
+                  View History
+                </button>
+              </div>
               <textarea
                 className="textarea border-orange-500 bg-orange-100 border-[3px] mt-5 h-[300px] w-[100vh]"
-                value={textAreaContent} // Use state value
-                onChange={(e) => setTextAreaContent(e.target.value)} // Allow manual input
+                value={textAreaContent}
+                onChange={(e) => setTextAreaContent(e.target.value)}
                 placeholder="Speak or type text here..."
+                style={{ resize: "vertical" }}
               ></textarea>
 
               <div className="flex items-center space-x-3 mt-4">
                 <SpeechToText
                   ref={speechToTextRef}
-                  onTranscript={handleTranscript} // Handle transcription
+                  onTranscript={handleTranscript}
                   onStopListening={handleStopListening}
-                  onVoiceResponse={(response) => setVoiceResponse(response)}
+                  onVoiceResponse={setVoiceResponse}
                   onListeningChange={setIsListening}
                 />
 
@@ -172,13 +212,39 @@ function Home() {
       <div className="card border border-orange-500 bg-orange-100 border-[3px] rounded-box h-[150px] flex-grow m-5 p-5">
         <b className="text-1.5xl">"AI Verifies Results:"</b>
         <div className="flex justify-between mt-3 gap-4">
-          <div className="border border-gray-400 bg-white rounded-md p-2 w-1/2 text-center">
-            <b>Voice AI Response:</b>
-            <div>{voiceResponse || "Awaiting voice analysis..."}</div>
+          <div className="w-1/3 text-center">
+            <b>Audio AI Response:</b>
+            <button
+              disabled
+              className={`${getColorClass(
+                voiceResponse
+              )} font-semibold py-2 px-4 rounded mt-2 w-full cursor-default`}
+            >
+              {voiceResponse || "Awaiting voice analysis..."}
+            </button>
           </div>
-          <div className="border border-gray-400 bg-white rounded-md p-2 w-1/2 text-center">
-            <b>AI Response:</b>
-            <div>{aiResponse || "Awaiting analysis..."}</div>
+          <div className="w-1/3 text-center">
+            <b>AI Model Response:</b>
+            <button
+              disabled
+              className={`${getColorClass(
+                aiResponse
+              )} font-semibold py-2 px-4 rounded mt-2 w-full cursor-default`}
+            >
+              {aiResponse || "Awaiting response..."}
+            </button>
+          </div>
+          <div className="w-1/3 text-center">
+            <b>BBC Check Result:</b>
+            <button
+              disabled
+              className={`${getColorClass(
+                bbcResponse,
+                "bbc"
+              )} font-semibold py-2 px-4 rounded mt-2 w-full cursor-default`}
+            >
+              {bbcResponse || "Awaiting BBC check..."}
+            </button>
           </div>
         </div>
       </div>
