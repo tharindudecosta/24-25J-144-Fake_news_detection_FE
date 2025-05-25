@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import image3 from "../../../public/assets/loginimg.jpeg";
+import image3 from "../../../public/assets/loginimg.jpg";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { auth, firestore } from "../../../firebaseconfig";
