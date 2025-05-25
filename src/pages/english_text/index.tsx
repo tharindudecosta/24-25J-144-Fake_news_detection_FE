@@ -6,7 +6,7 @@ import Niv from "@/components/niv";
 import Swal from "sweetalert2";
 import SpeechToText from "../../components/SpeechToText";
 import { auth, firestore } from "../../../firebaseconfig";
-import { collection, addDoc, doc, setDoc } from "firebase/firestore";
+import { collection, addDoc, doc } from "firebase/firestore";
 import axios from "axios";
 
 function Home() {
@@ -15,11 +15,13 @@ function Home() {
   const [isListening, setIsListening] = useState(false);
   const [aiResponse, setAIResponse] = useState("");
   const [bbcResponse, setBBCResponse] = useState("");
-  const speechToTextRef = useRef<any>(null);
+  const speechToTextRef = useRef(null);
   const [voiceResponse, setVoiceResponse] = useState("");
 
-  const handleTranscript = (text: string) => {
-    setTextAreaContent(text);
+  const handleTranscript = (text) => {
+    if (!textAreaContent.trim()) {
+      setTextAreaContent(text);
+    }
   };
 
   const handleStopListening = () => {
@@ -56,14 +58,13 @@ function Home() {
           Swal.showLoading();
         },
       });
+
       const response = await axios.post(
         "https://fakenewsenglish-766120731872.us-central1.run.app",
         { text: textAreaContent }
       );
 
       const apiResult = response.data.result;
-      console.log("API Result:", apiResult);
-
       const userDocRef = collection(firestore, "EnglishNews");
       const docRef = doc(userDocRef, userEmail);
       const resultsCollection = collection(docRef, "Results");
@@ -71,44 +72,27 @@ function Home() {
       try {
         const crawlResponse = await axios.post(
           "https://englishwebscraping-766120731872.europe-west1.run.app",
-          {
-            text: textAreaContent,
-          }
+          { text: textAreaContent }
         );
 
-        console.log("Crawl Response:", crawlResponse.data);
-        console.log("Crawl Response status:", crawlResponse.data.status);
-
         const { status } = crawlResponse.data;
-        setBBCResponse(status === "found" ? "REAL" : "FAKE");
+        setBBCResponse(status === "found" ? "FOUND" : "NOT FOUND");
 
-        if (status === "found") {
-          await addDoc(resultsCollection, {
-            inputText: textAreaContent,
-            aiResult: apiResult,
-            bbcResult: "REAL",
-            timestamp: new Date(),
-          });
-          setAIResponse(apiResult);
-          Swal.fire(
-            "Content Verified",
-            "This content exists on BBC!",
-            "success"
-          );
-        } else {
-          await addDoc(resultsCollection, {
-            inputText: textAreaContent,
-            aiResult: apiResult,
-            bbcResult: "FAKE",
-            timestamp: new Date(),
-          });
-          setAIResponse(apiResult);
-          Swal.fire(
-            "Content Not Found",
-            "This content doesn't match BBC articles.",
-            "warning"
-          );
-        }
+        await addDoc(resultsCollection, {
+          inputText: textAreaContent,
+          aiResult: apiResult,
+          bbcResult: status === "found" ? "FOUND" : "NOT FOUND",
+          timestamp: new Date(),
+        });
+        setAIResponse(apiResult);
+
+        Swal.fire(
+          status === "found" ? "Content Verified" : "Content Not Found",
+          status === "found"
+            ? "This content exists on BBC!"
+            : "This content doesn't match BBC articles.",
+          status === "found" ? "success" : "warning"
+        );
       } catch (crawlErr) {
         console.error("Web scraping error:", crawlErr);
         Swal.fire("Error", "BBC scraping failed. Try again.", "error");
@@ -134,12 +118,27 @@ function Home() {
       speechToTextRef.current.clearTranscript();
     }
     window.location.reload();
-    console.log("Clearing data...");
     Swal.fire("Cleared", "The text and AI result have been cleared.", "info");
   };
 
   const handleViewHistory = () => {
-    router.push('/englishNewsHistory');
+    router.push("/englishNewsHistory");
+  };
+
+  const getColorClass = (text, type) => {
+    if (!text) return "bg-yellow-400 text-black";
+    if (type === "bbc") {
+      return text === "FOUND"
+        ? "bg-green-500 text-white"
+        : "bg-red-500 text-white";
+    }
+    if (text.toLowerCase().includes("real")) return "bg-green-500 text-white";
+    if (
+      text.toLowerCase().includes("fake") ||
+      text.toLowerCase().includes("ai")
+    )
+      return "bg-red-500 text-white";
+    return "bg-yellow-400 text-black";
   };
 
   return (
@@ -151,21 +150,17 @@ function Home() {
             <h2 className="text-orange-500 text-3xl font-bold mb-8">
               English Text and Voice Verification: Detect Authenticity
             </h2>
-
             <b className="text-1.5xl me-5">
               Upload text or voice to verify if it's real or fabricated
             </b>
-
             <div className="card w-96 flex-grow me-3 relative">
               <p>
-                "Uncertain whether an English text or voice recording is
+                Uncertain whether an English text or voice recording is
                 authentic? Upload your content, and our AI-powered system will
                 analyze it for any signs of manipulation or fabrication. Using
                 advanced natural language processing and voice recognition
                 technology, we'll determine if the text is genuine or fake and
                 whether the voice recording has been altered or generated by AI.
-                Ensure that the information you receive or share is reliable and
-                accurate."
               </p>
             </div>
           </div>
@@ -183,11 +178,8 @@ function Home() {
                 className="textarea border-orange-500 bg-orange-100 border-[3px] mt-5 h-[300px] w-[100vh]"
                 value={textAreaContent}
                 onChange={(e) => setTextAreaContent(e.target.value)}
-                onInput={(e) => setTextAreaContent(e.currentTarget.value)}
                 placeholder="Speak or type text here..."
-                style={{ resize: 'vertical' }}
-                readOnly={false}
-                disabled={false}
+                style={{ resize: "vertical" }}
               ></textarea>
 
               <div className="flex items-center space-x-3 mt-4">
@@ -195,7 +187,7 @@ function Home() {
                   ref={speechToTextRef}
                   onTranscript={handleTranscript}
                   onStopListening={handleStopListening}
-                  onVoiceResponse={(response) => setVoiceResponse(response)}
+                  onVoiceResponse={setVoiceResponse}
                   onListeningChange={setIsListening}
                 />
 
@@ -211,7 +203,6 @@ function Home() {
                 >
                   Clear
                 </button>
-               
               </div>
             </div>
           </div>
@@ -221,17 +212,39 @@ function Home() {
       <div className="card border border-orange-500 bg-orange-100 border-[3px] rounded-box h-[150px] flex-grow m-5 p-5">
         <b className="text-1.5xl">"AI Verifies Results:"</b>
         <div className="flex justify-between mt-3 gap-4">
-          <div className="border border-gray-400 bg-white rounded-md p-2 w-1/3 text-center">
-            <b>Voice AI Response:</b>
-            <div>{voiceResponse || "Awaiting voice analysis..."}</div>
+          <div className="w-1/3 text-center">
+            <b>Audio AI Response:</b>
+            <button
+              disabled
+              className={`${getColorClass(
+                voiceResponse
+              )} font-semibold py-2 px-4 rounded mt-2 w-full cursor-default`}
+            >
+              {voiceResponse || "Awaiting voice analysis..."}
+            </button>
           </div>
-          <div className="border border-gray-400 bg-white rounded-md p-2 w-1/3 text-center">
+          <div className="w-1/3 text-center">
             <b>AI Model Response:</b>
-            <div>{aiResponse || "Awaiting response..."}</div>
+            <button
+              disabled
+              className={`${getColorClass(
+                aiResponse
+              )} font-semibold py-2 px-4 rounded mt-2 w-full cursor-default`}
+            >
+              {aiResponse || "Awaiting response..."}
+            </button>
           </div>
-          <div className="border border-gray-400 bg-white rounded-md p-2 w-1/3 text-center">
+          <div className="w-1/3 text-center">
             <b>BBC Check Result:</b>
-            <div>{bbcResponse || "Awaiting BBC check..."}</div>
+            <button
+              disabled
+              className={`${getColorClass(
+                bbcResponse,
+                "bbc"
+              )} font-semibold py-2 px-4 rounded mt-2 w-full cursor-default`}
+            >
+              {bbcResponse || "Awaiting BBC check..."}
+            </button>
           </div>
         </div>
       </div>

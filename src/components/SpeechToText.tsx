@@ -177,17 +177,17 @@ const SpeechToText = forwardRef<any, SpeechToTextProps>(
         let responseMessage = "Failed to process audio.";
 
         if (result.message === "The input audio is classified as fake.") {
-          responseMessage = "Your voice is real.";
+          responseMessage = "Audio is AI-generated.";
         } else if (
           result.message === "The input audio is classified as real."
         ) {
-          responseMessage = "Your voice is AI-generated.";
+          responseMessage = "Audio is real.";
         }
 
         Swal.fire("Success", responseMessage, "success");
         onVoiceResponse(responseMessage);
 
-         Swal.fire({
+        Swal.fire({
           title: "Processing",
           text: "Please wait while we analyze the audio...",
           icon: "info",
@@ -196,8 +196,7 @@ const SpeechToText = forwardRef<any, SpeechToTextProps>(
             Swal.showLoading();
           },
         });
-
-         const response1 = await fetch(
+        const response1 = await fetch(
           "https://voicetotext-766120731872.us-central1.run.app",
           {
             method: "POST",
@@ -212,7 +211,9 @@ const SpeechToText = forwardRef<any, SpeechToTextProps>(
         if (result1.transcription) {
           Swal.fire("Success", "Transcription complete!", "success");
           console.log(result1.transcription);
-          setTranscript((prevTranscript) => prevTranscript + " " + result1.transcription);
+          setTranscript(
+            (prevTranscript) => prevTranscript + " " + result1.transcription
+          );
           setIsModalOpen(false);
         } else {
           Swal.fire("Error", "Failed to transcribe audio.", "error");
@@ -231,7 +232,7 @@ const SpeechToText = forwardRef<any, SpeechToTextProps>(
           className="w-50 py-2 px-4 rounded font-bold bg-green-600 text-white"
           onClick={() => setIsModalOpen(true)}
         >
-          Record Voice
+          Audio Analysis
         </button>
 
         {isModalOpen && (
